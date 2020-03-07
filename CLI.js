@@ -1,5 +1,9 @@
 const fs = require ("fs");
 const inquirer = require ("inquirer");
+const util = require ("util")
+const count = 0;
+
+const writeFileAsyc = util.promisify(fs.appendFile);
 
 function htmlBegin(){
     return `
@@ -24,19 +28,22 @@ function htmlBegin(){
 function htmlCard(answers){
     return `
     <div class="col-sm-4">
-                    <div class="card">
-                        <h5 class="card-header">Team name</h5>
-                        <div class="card-body">
-                            <div class="card">
-                                <ul class="list-group list-group-flush">
-                                <li class="list-group-item">Cras justo odio</li>
-                                <li class="list-group-item">Dapibus ac facilisis in</li>
-                                <li class="list-group-item">Vestibulum at eros</li>
-                                 </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>`
+    <div class="card">
+        <div class="card-header">
+            <h5>${answers.realname}</h5>
+            <h5>${answers.job}</h5>
+        </div>
+        <div class="card-body">
+            <div class="card">
+                <ul class="list-group list-group-flush">
+                <li class="list-group-item">${answers.ID}</li>
+                <li class="list-group-item">${answers.email}</li>
+                <li class="list-group-item">${answers.email}</li>
+                 </ul>
+            </div>
+        </div>
+    </div>
+</div>`
 };
 
 function htmlEnd(){
@@ -48,9 +55,66 @@ function htmlEnd(){
 </html>`
 };
 
+function question (){ 
+    return inquirer.prompt([
+            {
+                type: "number",
+                message: "What ID number do they have?",
+                name: "ID"
+            },
+            {
+                type: "input",
+                message: "What's the name of your team member?",
+                name: "realname"
+            },
+            {
+                type: "input",
+                message: "What job position do they have in your team?",
+                name: "job"
+            },
+            {
+                type: "input",
+                message: "what's their email address?",
+                name: "email"
+            },
+            {
+                type: "input",
+                message: "What's the name of their Github username?",
+                name: "username"
+            }
+        ])
+}
+
 fs.writeFile("index.html", htmlBegin(), function (err){
     if(err){
         throw err
     };
+});
+
+inquirer.prompt([
+    {
+        type: "number",
+        message: "How many members does your team have?",
+        name: "teamplayer"
+    }
+])
+.then(function (answers){
+    question()
+    .then( function (answers){
+    let card = htmlCard(answers)    
+    writeFileAsyc("index.html", card);
+    count ++;
+    }).catch( function (err){ 
+            throw err
+    });
+
+    if(count < answers.teamplayer){
+        question()
+    }
+
+    writeFileAsyc("index.html", htmlEnd());
+})
+.catch(function (err){
+    throw err
 });
 
