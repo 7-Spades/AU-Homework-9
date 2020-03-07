@@ -1,7 +1,7 @@
 const fs = require ("fs");
 const inquirer = require ("inquirer");
 const util = require ("util")
-const count = 0;
+let count = 0;
 
 const writeFileAsyc = util.promisify(fs.appendFile);
 
@@ -38,7 +38,7 @@ function htmlCard(answers){
                 <ul class="list-group list-group-flush">
                 <li class="list-group-item">${answers.ID}</li>
                 <li class="list-group-item">${answers.email}</li>
-                <li class="list-group-item">${answers.email}</li>
+                <li class="list-group-item">${answers.username}</li>
                  </ul>
             </div>
         </div>
@@ -82,7 +82,7 @@ function question (){
                 message: "What's the name of their Github username?",
                 name: "username"
             }
-        ])
+    ])
 }
 
 fs.writeFile("index.html", htmlBegin(), function (err){
@@ -99,22 +99,23 @@ inquirer.prompt([
     }
 ])
 .then(function (answers){
+
     question()
     .then( function (answers){
     let card = htmlCard(answers)    
     writeFileAsyc("index.html", card);
-    count ++;
-    }).catch( function (err){ 
+    })
+    .catch( function (err){ 
             throw err
     });
 
     if(count < answers.teamplayer){
+       count ++; 
         question()
-    }
-
-    writeFileAsyc("index.html", htmlEnd());
+    }    
 })
 .catch(function (err){
     throw err
 });
 
+writeFileAsyc("index.html", htmlEnd());
